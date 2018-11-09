@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.chan.myapplication.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorMainTitle"
+            android:padding="10dp"
+            android:text="@string/main_title"
+            android:textAlignment="textStart"
+            android:textColor="@color/colorTitleText"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/search_bluetooth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorButtonTxt"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@color/buttonBackground"
+            android:text="@string/searchBluetooth" />
+
+        <ListView
+            android:id="@+id/list_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@color/divider"
+            android:dividerHeight="1dp"
+            android:listSelector="@color/colorItem">
+        </ListView>
+
+    </LinearLayout>
+
+
+</android.support.constraint.ConstraintLayout>
