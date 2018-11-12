@@ -1,4 +1,4 @@
-package com.chan.myapplication;
+package com.chan.controller;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,7 +14,7 @@ import android.view.WindowManager;
  */
 
 public class SplashActivity extends Activity{
-    private final int SPLASH_DISPLAY_LENGHT = 3000;
+    private final int SPLASH_DISPLAY_LENGHT = 1000;
     private Handler handler;
 
     @Override

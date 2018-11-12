@@ -2,4 +2,5 @@
     <string name="app_name">卫星控制器</string>
     <string name="main_title">蓝牙连接</string>
     <string name="searchBluetooth">搜 索 附 近 蓝 牙</string>
+    <string name="arrow"> > </string>
 </resources>

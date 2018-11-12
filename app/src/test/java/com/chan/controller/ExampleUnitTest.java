@@ -1,4 +1,4 @@
-package com.chan.myapplication;
+package com.chan.controller;
 
 import org.junit.Test;
 
