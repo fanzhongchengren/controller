@@ -7,6 +7,7 @@
     <color name="colorTitleText">#FFFFFF</color>
     <color name="colorButtonTxt">#FFFFFF</color>
     <color name="buttonBackground">#31B8FF</color>
+    <color name="iconBackground">#FF31B8FF</color>
     <color name="colorItem">#E8F5Fb</color>
     <color name="divider">#96DBFF</color>
 </resources>
