@@ -2,6 +2,7 @@ package com.chan.controller;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
@@ -14,20 +15,20 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,8 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private Boolean scanning = false;
     //适配器列表
     private ListView lv;
-    private List<Map<String, Object>> li = new ArrayList<>();
-    private SimpleAdapter adapter;
+    private BluetoothListAdapter adapter;
 
     //创建一个消息处理函数
     private Handler mHandler;
@@ -53,13 +53,14 @@ public class MainActivity extends AppCompatActivity {
     //intent 数据标志
     int REQUEST_ENABLE_BT = 1;
     //定义蓝牙扫描周期
-    private static final long SCAN_PERIOD = 5000;
+    private static final long SCAN_PERIOD = 10000;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
 
@@ -68,21 +69,14 @@ public class MainActivity extends AppCompatActivity {
         anim = (AnimationDrawable) bluetooth_icon.getBackground();
 
 
-        //Android6.0需要动态申请权限
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
+        //Android5.0及以上 还 需要动态申请权限
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //请求权限
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                            Manifest.permission.ACCESS_FINE_LOCATION},1);
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                Toast.makeText(this, "打开权限", Toast.LENGTH_SHORT).show();
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},1);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                Toast.makeText(this, "请打开权限", Toast.LENGTH_SHORT).show();
             }
         }
-
-
-
 
         //初始化蓝牙状态
         initBle();
@@ -94,20 +88,29 @@ public class MainActivity extends AppCompatActivity {
         mHandler = new Handler();
         //蓝牙列表
         lv = findViewById(R.id.list_view);
-        adapter = new SimpleAdapter(this,li,R.layout.list_item,
-                new String[]{"device"},new int[]{R.id.title});
+        adapter = new BluetoothListAdapter();
         lv.setAdapter(adapter);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Map<String,Object> map = (Map<String,Object>)adapterView.getItemAtPosition(i);
-                Toast.makeText(MainActivity.this,map.get("title").toString(),Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(MainActivity.this,MonitorActivity.class);
-                startActivity(intent);
+                final BluetoothDevice d = adapter.getDevice(i);
+                if (d == null) { return; }
+                final Intent intent = new Intent(MainActivity.this,MonitorActivity.class);
+                intent.putExtra(MonitorActivity.EXTRAS_DEVICE_NAME, d.getName());
+                intent.putExtra(MonitorActivity.EXTRAS_DEVICE_ADDRESS, d.getAddress());
+                intent.putExtra(MonitorActivity.EXTRAS_DEVICE_RSSI, adapter.rssis.get(i).toString());
+                if (scanning) {
+                    stopScanAnim();
+                    mBluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
+                    scanning = false;
+                }
+                try{
+                    startActivity(intent);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
         });
-
-
     }
 
 //    初始化蓝牙
@@ -128,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
 
 //    初始化扫描按钮
     private void intBtn(){
-
         search_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -147,10 +149,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startScanAnim(){
+        flag = true;
         search_btn.setText("搜 索 中 …");
         anim.start();
     }
     private void stopScanAnim(){
+        flag = false;
         search_btn.setText("搜 索 附 近 蓝 牙");
         anim.selectDrawable(0);
         anim.stop();
@@ -163,17 +167,16 @@ public class MainActivity extends AppCompatActivity {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(MainActivity.this, "扫描结束", Toast.LENGTH_SHORT).show();
-                    scanning = false;
                     stopScanAnim();
                     mBluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
+                    scanning = false;
                 }
             },SCAN_PERIOD);
-            scanning = true;
             mBluetoothAdapter.getBluetoothLeScanner().startScan(mScanCallback);
+            scanning = true;
         }else{
-            scanning = false;
             mBluetoothAdapter.getBluetoothLeScanner().stopScan(mScanCallback);
+            scanning = false;
         }
     }
 
@@ -181,15 +184,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-
-            Map<String,Object> map = new HashMap<>();
-            map.put("device", result);
-            li.add(map);
+            adapter.addDevice(result.getDevice(),result.getRssi());
             adapter.notifyDataSetChanged();
-
-            System.out.println("haha"+result.getDevice().toString());
-
-            Toast.makeText(MainActivity.this, "onScanResult", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -201,10 +197,68 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
-            Toast.makeText(MainActivity.this, "onScanFailed", Toast.LENGTH_SHORT).show();
-            System.out.println("haha:" + errorCode);
+            Toast.makeText(MainActivity.this, "onScanFailed: "+ errorCode, Toast.LENGTH_SHORT).show();
         }
     };
 
+    private class BluetoothListAdapter extends BaseAdapter {
+
+        private ArrayList<BluetoothDevice> mDevices;
+        private ArrayList<Integer> rssis;
+        private LayoutInflater mInflator;
+
+        public BluetoothListAdapter(){
+            super();
+            rssis = new ArrayList<>();
+            mDevices = new ArrayList<>();
+            mInflator = getLayoutInflater();
+        }
+
+        public void addDevice(BluetoothDevice device, int rssi) {
+            if (!mDevices.contains(device)) {
+                mDevices.add(device);
+                rssis.add(rssi);
+            }
+        }
+
+        public BluetoothDevice getDevice(int position) {
+            return mDevices.get(position);
+        }
+
+        public void clear() {
+            mDevices.clear();
+            rssis.clear();
+        }
+
+        @Override
+        public int getCount() {
+            return mDevices.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return mDevices.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            view = mInflator.inflate(R.layout.list_item,null);
+            TextView device_address = view.findViewById(R.id.device_address);
+            TextView device_name = view.findViewById(R.id.device_name);
+            TextView device_rssi = view.findViewById(R.id.device_rssi);
+
+            BluetoothDevice device = mDevices.get(i);
+            device_address.setText("MAC: " + device.getAddress());
+            device_name.setText(device.getName());
+            device_rssi.setText("RSSI: " + rssis.get(i));
+
+            return view;
+        }
+    }
 
 }

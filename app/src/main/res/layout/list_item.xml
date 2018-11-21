@@ -14,7 +14,8 @@
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:padding="10dp"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_centerVertical="true">
 
             <ImageView
                 android:layout_width="20sp"
@@ -23,12 +24,28 @@
                 android:src="@mipmap/bluetooth"/>
 
             <TextView
-                android:id="@+id/title"
+                android:id="@+id/device_name"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:textSize="15sp"
-                android:text="项目1"/>
+                android:layout_height="match_parent"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="14sp"/>
+            <TextView
+                android:id="@+id/device_address"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAlignment="center"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"/>
+            <TextView
+                android:id="@+id/device_rssi"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAlignment="center"
+                android:textColor="#666666"
+                android:textSize="14sp"/>
 
         </LinearLayout>
 
