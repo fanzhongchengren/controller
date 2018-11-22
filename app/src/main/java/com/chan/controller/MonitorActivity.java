@@ -1,7 +1,10 @@
 package com.chan.controller;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -70,7 +73,8 @@ public class MonitorActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Toast.makeText(MonitorActivity.this, "onServiceDisconnected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MonitorActivity.this, "服务断开", Toast.LENGTH_SHORT).show();
+            mBluetoothService = null;
         }
 
         @Override
@@ -83,7 +87,45 @@ public class MonitorActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mServiceConnection);
+        unregisterReceiver(bluetoothBroadcastReciver);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(bluetoothBroadcastReciver, bIntentFilter());
+        if (mBluetoothService != null) {
+            mBluetoothService.connectDevice(deviceAddress);
+        }
+    }
+
+    private static IntentFilter bIntentFilter () {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothService.ACTION_DATA_AVAILABLE);
+        return intentFilter;
+    }
+
+    private BroadcastReceiver bluetoothBroadcastReciver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (BluetoothService.ACTION_GATT_CONNECTED.equals(action)) {
+                //连接成功
+                System.out.println("haha:连接成功");
+            }else if (BluetoothService.ACTION_DATA_AVAILABLE.equals(action)) {
+                //有效数据
+                System.out.println("haha:有效数据");
+            }else if (BluetoothService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                //断开连接
+                System.out.println("haha:断开连接");
+            }else if (BluetoothService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
+                //发现服务
+                System.out.println("haha:发现服务");
+            }
+        }
+    };
 
 }
