@@ -63,18 +63,16 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
-
         search_btn = findViewById(R.id.search_bluetooth);
         bluetooth_icon = findViewById(R.id.bluetooth_icon);
         anim = (AnimationDrawable) bluetooth_icon.getBackground();
-
 
         //Android5.0及以上 还 需要动态申请权限
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //请求权限
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},1);
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                Toast.makeText(this, "请打开权限", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "打开权限", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -126,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
             Intent enableBLEIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBLEIntent,REQUEST_ENABLE_BT);
         }
-
     }
 
 //    初始化扫描按钮

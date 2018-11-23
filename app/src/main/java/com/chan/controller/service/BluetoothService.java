@@ -37,7 +37,7 @@ public class BluetoothService extends Service {
 
     public final static String ACTION_GATT_CONNECTED = "com.chan.controller.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED = "com.chan.controller.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.controller.chan.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED = "com.chan.controller.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
     public final static String ACTION_DATA_AVAILABLE = "com.chan.controller.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA = "com.chan.controller.bluetooth.le.EXTRA_DATA";
 
@@ -77,6 +77,7 @@ public class BluetoothService extends Service {
     }
 
     public void connectDevice(final String address) {
+
         if (mBluetoothAdapter == null || address == null) {
             System.out.println("连接蓝牙时失败");
         }
@@ -86,6 +87,7 @@ public class BluetoothService extends Service {
                 connectionState = STATE_CONNECTING;
             }
         }
+
         final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         if (device == null) {
             Toast.makeText(this, "获取设备失败", Toast.LENGTH_SHORT).show();
@@ -104,7 +106,7 @@ public class BluetoothService extends Service {
             super.onCharacteristicRead(gatt, characteristic, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 updateBroadcast(ACTION_DATA_AVAILABLE,characteristic);
-                System.out.println("haha:"+ characteristic + "---" + status);
+                System.out.println("haha:"+ characteristic);
             }
         }
 
@@ -114,6 +116,7 @@ public class BluetoothService extends Service {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 connectionState = STATE_CONNECTED;
                 updateBroadcast(ACTION_GATT_CONNECTED);
+                mBluetoothGatt.discoverServices();
             }else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 connectionState = STATE_DISCONNECTED;
                 updateBroadcast(ACTION_GATT_DISCONNECTED);
@@ -139,6 +142,7 @@ public class BluetoothService extends Service {
             super.onReadRemoteRssi(gatt, rssi, status);
             updateBroadcast(ACTION_DATA_AVAILABLE, rssi);
         }
+
     };
 
 
@@ -174,12 +178,56 @@ public class BluetoothService extends Service {
             final StringBuilder stringBuilder = new StringBuilder(data.length);
             for (byte byteChar : data) {
                 //以十六进制输出,2为指定的输出字段的宽度.如果位数小于2,则左端补0
+                System.out.println("haha:+++" + String.format("%02X", byteChar));
                 stringBuilder.append(String.format("%02X", byteChar));
             }
             intent.putExtra(EXTRA_DATA, stringBuilder.toString());
             sendBroadcast(intent);
         }
 
+    }
+
+    public void disconnect() {
+        if (mBluetoothGatt == null) {
+            return;
+        }
+        mBluetoothGatt.disconnect();
+    }
+
+    public void readRemoteRssi() {
+        if (mBluetoothGatt == null || mBluetoothAdapter == null) {
+            return;
+        }
+        mBluetoothGatt.readRemoteRssi();
+    }
+
+    public void setCharacteristicNotification(BluetoothGattCharacteristic characteristic, boolean enabled) {
+        if (mBluetoothGatt == null || mBluetoothAdapter == null) {
+            return;
+        }
+        mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+    }
+
+    public void writeCharacteristic(BluetoothGattCharacteristic characteristic) {
+        if (mBluetoothGatt == null || mBluetoothAdapter == null) {
+            return;
+        }
+        mBluetoothGatt.writeCharacteristic(characteristic);
+    }
+
+    public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
+        if (mBluetoothGatt == null || mBluetoothAdapter == null) {
+            return;
+        }
+        mBluetoothGatt.readCharacteristic(characteristic);
+    }
+
+
+    public List<BluetoothGattService> getServices() {
+        if (mBluetoothGatt == null || mBluetoothAdapter == null) {
+            return null;
+        }
+        return mBluetoothGatt.getServices();
     }
 
 }

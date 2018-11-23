@@ -14,8 +14,6 @@ import android.view.WindowManager;
  */
 
 public class SplashActivity extends Activity{
-    private final int SPLASH_DISPLAY_LENGHT = 1000;
-    private Handler handler;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -24,7 +22,8 @@ public class SplashActivity extends Activity{
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_splash);
 
-        handler = new Handler();
+        Handler handler = new Handler();
+        int SPLASH_DISPLAY_TIME = 1000;
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -32,6 +31,6 @@ public class SplashActivity extends Activity{
                 startActivity(intent);
                 SplashActivity.this.finish();
             }
-        }, SPLASH_DISPLAY_LENGHT);
+        }, SPLASH_DISPLAY_TIME);
     }
 }
