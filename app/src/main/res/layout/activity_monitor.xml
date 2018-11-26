@@ -4,40 +4,107 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     tools:context="com.chan.controller.MonitorActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/address"
+        <LinearLayout
+            android:id="@+id/txt"
+            android:layout_alignParentTop="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:text="@string/app_name"/>
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30sp"
-            android:text="@string/app_name"/>
+            <TextView
+                android:id="@+id/address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:text="@string/app_name"/>
 
-        <Button
-            android:id="@+id/send_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="发送"/>
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="30sp"
+                android:text="@string/app_name"/>
 
-        <Button
-            android:id="@+id/get_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@id/address"
-            android:text="获取"/>
+            <Button
+                android:id="@+id/send_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="发送"/>
 
-    </LinearLayout>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/ctr"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp">
+
+
+            <TextView
+                android:id="@+id/center"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_centerInParent="true"
+                android:textSize="40sp"
+                android:textAlignment="center"/>
+
+            <Button
+                android:id="@+id/up"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_above="@+id/center"
+                android:layout_centerHorizontal="true"
+                android:textSize="40sp"
+                android:text="@string/topA"
+                android:textAlignment="center"
+                android:background="@drawable/up_select"/>
+
+            <Button
+                android:id="@+id/down"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_below="@+id/center"
+                android:layout_centerHorizontal="true"
+                android:textSize="40sp"
+                android:text="@string/bottomA"
+                android:textAlignment="center"
+                android:background="@drawable/down_select"/>
+
+            <Button
+                android:id="@+id/left"
+                android:layout_width="50dp"
+                android:layout_height="100dp"
+                android:layout_toLeftOf="@+id/center"
+                android:layout_centerVertical="true"
+                android:textSize="40sp"
+                android:text="@string/leftA"
+                android:textAlignment="center"
+                android:background="@drawable/left_select"/>
+
+            <Button
+                android:id="@+id/right"
+                android:layout_width="50dp"
+                android:layout_height="100dp"
+                android:layout_toRightOf="@+id/center"
+                android:layout_centerVertical="true"
+                android:textSize="40sp"
+                android:text="@string/rightA"
+                android:textAlignment="center"
+                android:background="@drawable/right_select"/>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
 
 </android.support.constraint.ConstraintLayout>

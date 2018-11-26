@@ -49,6 +49,10 @@ public class MonitorActivity extends AppCompatActivity {
 
     //发送指令
     private Button sendBtn;
+    private TextView upBtn;
+    private TextView downBtn;
+    private TextView leftBtn;
+    private TextView rightBtn;
     private final byte cmd[] = {(byte)0x11, (byte)0x22, (byte)0x33, (byte)0x44, (byte)0x55};
     private BluetoothGattCharacteristic command;
 
@@ -76,6 +80,23 @@ public class MonitorActivity extends AppCompatActivity {
     private void initBtn() {
         sendBtn = findViewById(R.id.send_btn);
         sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    command.setValue(cmd);
+                    mBluetoothService.writeCharacteristic(command);
+                }catch(Exception e) {
+
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        upBtn = findViewById(R.id.up);
+        downBtn = findViewById(R.id.down);
+        leftBtn = findViewById(R.id.left);
+        rightBtn = findViewById(R.id.right);
+        upBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
