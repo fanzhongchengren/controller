@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -16,18 +17,33 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chan.controller.service.BluetoothService;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
  * Created by chenzhengyang on 2018/11/12.
  */
-public class MonitorActivity extends AppCompatActivity {
+public class MonitorActivity extends AppCompatActivity implements OnChartValueSelectedListener {
 
     //蓝牙4.0的UUID,其中0000ffe1-0000-1000-8000-00805f9b34fb是广州汇承信息科技有限公司08蓝牙模块的UUID
     public static String HEART_RATE_MEASUREMENT = "0000ffe1-0000-1000-8000-00805f9b34fb";
@@ -46,6 +62,7 @@ public class MonitorActivity extends AppCompatActivity {
     private static BluetoothService mBluetoothService;
 
     private Handler mHandler = new Handler();
+
 
     //发送指令
     private Button sendBtn;
@@ -74,6 +91,71 @@ public class MonitorActivity extends AppCompatActivity {
         bindService(serviceIntent, mServiceConnection,BIND_AUTO_CREATE);
 
         initBtn();
+
+
+        LineChart mLineChart = findViewById(R.id.lineChart);
+        //显示边界
+//        mLineChart.setDrawBorders(true);
+        //设置数据
+        List<Entry> entries = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            entries.add(new Entry(i, (float) (Math.random()) * 80));
+        }
+        //一个LineDataSet就是一条线
+        LineDataSet lineDataSet = new LineDataSet(entries, "温度");
+        LineData data = new LineData(lineDataSet);
+        mLineChart.setData(data);
+
+        BarChart mBarChart = findViewById(R.id.barChart);
+        mBarChart.setOnChartValueSelectedListener(this);
+
+        mBarChart.setDrawBarShadow(false);
+        mBarChart.setDrawValueAboveBar(true);
+
+        mBarChart.getDescription().setEnabled(false);
+
+        // if more than 60 entries are displayed in the chart, no values will be
+        // drawn
+        mBarChart.setMaxVisibleValueCount(60);
+
+        // scaling can now only be done on x- and y-axis separately
+        mBarChart.setPinchZoom(false);
+
+        mBarChart.setDrawGridBackground(false);
+        // chart.setDrawYLabels(false);
+
+        //x轴数据
+        List<String> xData = new ArrayList<>();
+        for (int i = 0; i <= 20; i++) {
+            xData.add(String.valueOf(i));
+        }
+        //y轴数据集合
+        List<List<Float>> yBarDatas = new ArrayList<>();
+        //4种直方图
+        for (int i = 0; i < 4; i++) {
+            //y轴数
+            List<Float> yData = new ArrayList<>();
+            for (int j = 0; j <= 20; j++) {
+                yData.add((float) (Math.random() * 100));
+            }
+            yBarDatas.add(yData);
+        }
+        //名字集合
+        List<String> barNames = new ArrayList<>();
+        barNames.add("直方图一");
+        barNames.add("直方图二");
+        barNames.add("直方图三");
+        barNames.add("直方图四");
+        //颜色集合
+        List<Integer> colors = new ArrayList<>();
+        colors.add(Color.BLUE);
+        colors.add(Color.RED);
+        colors.add(Color.YELLOW);
+        colors.add(Color.CYAN);
+
+        mBarChart.setData(getBarData(yBarDatas.get(0),barNames.get(0),colors.get(0)));
+
+
 
     }
 
@@ -169,13 +251,12 @@ public class MonitorActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             TextView status = findViewById(R.id.status);
-            TextView address = findViewById(R.id.address);
-            status.setText(deviceAddress);
-            address.setText(action);
+            TextView devName = findViewById(R.id.device_name);
+            devName.setText("设备：" + deviceName);
             if (BluetoothService.ACTION_GATT_CONNECTED.equals(action)) {
                 //连接成功
                 System.out.println("haha:连接成功");
-//                mBluetoothService.setCharacteristicNotification(characterisic,true);
+                status.setText("状态：已连接");
                 mBluetoothService.readRemoteRssi();
             }else if (BluetoothService.ACTION_DATA_AVAILABLE.equals(action)) {
                 //有效数据
@@ -184,6 +265,7 @@ public class MonitorActivity extends AppCompatActivity {
             }else if (BluetoothService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 //断开连接
                 System.out.println("haha:断开连接");
+                status.setText("状态：已断开");
             }else if (BluetoothService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
                 //发现服务
                 System.out.println("haha:发现服务");
@@ -207,5 +289,33 @@ public class MonitorActivity extends AppCompatActivity {
             }
         }
     };
+
+    @Override
+    public void onValueSelected(Entry e, Highlight h) {
+
+    }
+
+    @Override
+    public void onNothingSelected() {
+
+    }
+
+
+    private BarData getBarData(List<Float> barChartY, String barName, int barColor) {
+        BarData barData = new BarData();
+        ArrayList<BarEntry> yValues = new ArrayList<>();
+        for (int i = 0; i < barChartY.size(); i++) {
+            yValues.add(new BarEntry(i, barChartY.get(i)));
+        }
+
+        BarDataSet barDataSet = new BarDataSet(yValues, barName);
+        barDataSet.setColor(barColor);
+        barDataSet.setValueTextSize(10f);
+        barDataSet.setValueTextColor(barColor);
+        barDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+        barData.addDataSet(barDataSet);
+
+        return barData;
+    }
 
 }
